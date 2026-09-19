@@ -27,10 +27,12 @@ plain MCP tools your agent can call.
 You need a Jev API key. Get one at [console.typesafe.ai](https://console.typesafe.ai), or use a
 gateway (Vercel AI Gateway, OpenRouter, Cloudflare) and point `JEV_BASE_URL` at it.
 
+Runs straight from GitHub with `npx` — no clone, no build.
+
 ### Claude Code
 
 ```bash
-claude mcp add jev -e TYPESAFE_API_KEY=your_key -- npx -y jev-mcp
+claude mcp add jev -e TYPESAFE_API_KEY=your_key -- npx -y github:codaaiteam/jev-mcp
 ```
 
 ### Any MCP client (`.mcp.json` / config)
@@ -40,7 +42,7 @@ claude mcp add jev -e TYPESAFE_API_KEY=your_key -- npx -y jev-mcp
   "mcpServers": {
     "jev": {
       "command": "npx",
-      "args": ["-y", "jev-mcp"],
+      "args": ["-y", "github:codaaiteam/jev-mcp"],
       "env": { "TYPESAFE_API_KEY": "your_key" }
     }
   }
@@ -48,6 +50,8 @@ claude mcp add jev -e TYPESAFE_API_KEY=your_key -- npx -y jev-mcp
 ```
 
 That's it — your agent now has `jev_classify`, `jev_score`, `jev_check`, `jev_gate`, `jev_decide`.
+
+> Once this is on npm you can shorten `github:codaaiteam/jev-mcp` to just `jev-mcp`.
 
 ## Configuration
 
