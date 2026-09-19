@@ -1,0 +1,41 @@
+{
+  "name": "jev-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Jev (TypeSafe AI's System One model) — give any agent fast, typed, calibrated decisions: classify, score, check yes/no, and gate risky tool calls.",
+  "type": "module",
+  "bin": {
+    "jev-mcp": "src/index.js"
+  },
+  "files": [
+    "src"
+  ],
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "jev",
+    "typesafe-ai",
+    "system-one",
+    "ai-agents",
+    "llm",
+    "classification",
+    "guardrails",
+    "claude-code"
+  ],
+  "author": "codaaiteam",
+  "license": "MIT",
+  "homepage": "https://jevtypesafeai.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/codaaiteam/jev-mcp.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "zod": "^3.23.8"
+  }
+}
