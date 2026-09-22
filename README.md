@@ -24,8 +24,12 @@ plain MCP tools your agent can call.
 
 ## Install
 
-You need a Jev API key. Get one at [console.typesafe.ai](https://console.typesafe.ai), or use a
-gateway (Vercel AI Gateway, OpenRouter, Cloudflare) and point `JEV_BASE_URL` at it.
+You need a Jev API key. Two ways to get one:
+
+- **Hosted (instant, no waitlist):** buy prepaid credit at [jevtypesafeai.com/pricing](https://jevtypesafeai.com/pricing) and you get a `jv_live_…` key. **No `JEV_BASE_URL` needed** — the server detects a `jv_live_` key and routes it to the hosted gateway automatically.
+- **Official TypeSafe:** get a key at [console.typesafe.ai](https://console.typesafe.ai). It's used against `api.typesafe.ai` by default.
+
+> ⚠️ A hosted `jv_live_…` key is **only** valid at the jevtypesafeai.com gateway, not at `api.typesafe.ai`. Older versions of this server defaulted every key to the official endpoint, so a hosted key returned `401 authentication_error`. That's now automatic — just set your key.
 
 Runs straight from GitHub with `npx` — no clone, no build.
 
@@ -49,7 +53,7 @@ claude mcp add jev -e TYPESAFE_API_KEY=your_key -- npx -y github:codaaiteam/jev-
 }
 ```
 
-That's it — your agent now has `jev_classify`, `jev_score`, `jev_check`, `jev_gate`, `jev_decide`.
+That's it — your agent now has `jev_classify`, `jev_score`, `jev_check`, `jev_gate`, `jev_decide`. Works with a hosted `jv_live_…` key or an official TypeSafe key; the endpoint is chosen for you.
 
 > Once this is on npm you can shorten `github:codaaiteam/jev-mcp` to just `jev-mcp`.
 
@@ -58,7 +62,7 @@ That's it — your agent now has `jev_classify`, `jev_score`, `jev_check`, `jev_
 | Env | Default | Notes |
 |-----|---------|-------|
 | `TYPESAFE_API_KEY` | — | Your Jev key (aliases: `JEV_API_KEY`, `JEV_KEY`). Required. |
-| `JEV_BASE_URL` | `https://api.typesafe.ai/v1/systemone` | Override to route through a gateway. |
+| `JEV_BASE_URL` | auto | Chosen from your key: a hosted `jv_live_…` key → `https://jevtypesafeai.com/api/v1/decide`; anything else → `https://api.typesafe.ai/v1/systemone`. Set it explicitly to route through your own gateway (Vercel AI Gateway, OpenRouter, Cloudflare). |
 | `JEV_MODEL` | `jev-latest` | Pin a version (e.g. `jev-1.13.0`) in production. |
 
 ## Examples

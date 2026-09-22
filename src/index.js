@@ -4,7 +4,9 @@
 //
 // Env:
 //   TYPESAFE_API_KEY   your Jev key (aliases: JEV_API_KEY, JEV_KEY)   [required]
-//   JEV_BASE_URL       endpoint (default https://api.typesafe.ai/v1/systemone)
+//   JEV_BASE_URL       endpoint. Defaults to the right one for your key:
+//                      a hosted jevtypesafeai.com key (jv_live_…) → that gateway;
+//                      a TypeSafe key → https://api.typesafe.ai/v1/systemone.
 //   JEV_MODEL          model id (default jev-latest)
 //
 // Learn more / try Jev free in the browser: https://jevtypesafeai.com
@@ -13,15 +15,24 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 
-const BASE_URL = process.env.JEV_BASE_URL || "https://api.typesafe.ai/v1/systemone";
 const MODEL = process.env.JEV_MODEL || "jev-latest";
 const API_KEY =
   process.env.TYPESAFE_API_KEY || process.env.JEV_API_KEY || process.env.JEV_KEY || "";
 
+// Endpoint resolution. A hosted key from jevtypesafeai.com looks like `jv_live_…`
+// and is ONLY valid at that gateway — sending it to TypeSafe's official endpoint
+// 401s. So when someone brings a jv_live_ key without setting JEV_BASE_URL, point
+// at the hosted gateway automatically instead of failing. An explicit JEV_BASE_URL
+// always wins (use it for a Vercel/OpenRouter/Cloudflare gateway).
+const HOSTED_URL = "https://jevtypesafeai.com/api/v1/decide";
+const OFFICIAL_URL = "https://api.typesafe.ai/v1/systemone";
+const BASE_URL =
+  process.env.JEV_BASE_URL || (API_KEY.startsWith("jv_live_") ? HOSTED_URL : OFFICIAL_URL);
+
 async function callJev(state, questions) {
   if (!API_KEY) {
     throw new Error(
-      "No API key. Set TYPESAFE_API_KEY (get one at https://console.typesafe.ai, or use a gateway and point JEV_BASE_URL at it)."
+      "No API key. Set TYPESAFE_API_KEY — get a hosted key instantly at https://jevtypesafeai.com/pricing (jv_live_…), or a TypeSafe key at https://console.typesafe.ai."
     );
   }
   const controller = new AbortController();
@@ -46,7 +57,17 @@ async function callJev(state, questions) {
   }
   const text = await res.text();
   if (!res.ok) {
-    throw new Error(`Jev API error ${res.status}: ${text.slice(0, 400)}`);
+    let hint = "";
+    if (res.status === 401 || res.status === 403) {
+      const looksHosted = API_KEY.startsWith("jv_live_");
+      const atHosted = BASE_URL.includes("jevtypesafeai.com");
+      if (looksHosted && !atHosted)
+        hint = ` — a hosted key (jv_live_…) only works against the jevtypesafeai.com gateway; set JEV_BASE_URL=${HOSTED_URL}`;
+      else if (!looksHosted && atHosted)
+        hint = ` — this endpoint expects a hosted jevtypesafeai.com key (jv_live_…); for a TypeSafe key unset JEV_BASE_URL or set it to ${OFFICIAL_URL}`;
+      else hint = " — check that your API key is correct and active";
+    }
+    throw new Error(`Jev API error ${res.status}: ${text.slice(0, 400)}${hint}`);
   }
   return JSON.parse(text);
 }
